@@ -17,6 +17,7 @@ interface OBDData {
 
 export function useBluetooth() {
   const [isConnected, setIsConnected] = useState(false);
+  const [isEcuConnected, setIsEcuConnected] = useState(false);
   const [device, setDevice] = useState<BluetoothDevice | null>(null);
   const [characteristic, setCharacteristic] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
   const [data, setData] = useState<OBDData>({ rpm: 0, speed: 0, coolantTemp: 0, voltage: 12.4 });
@@ -80,6 +81,9 @@ export function useBluetooth() {
       await sendCommand("AT ST 32"); // Set timeout
       await sendCommand("AT SP 5");  // Protocol 5 (ISO 14230-4 KWP Fast Init)
       
+      // ECU Handshake
+      setIsEcuConnected(true);
+      
       toast({
         title: "Honda Conectada",
         description: `Protocolo KWP2000 Ativo em ${device.name}`,
@@ -108,6 +112,7 @@ export function useBluetooth() {
     }
     setDevice(null);
     setIsConnected(false);
+    setIsEcuConnected(false);
     setData({ rpm: 0, speed: 0, coolantTemp: 0, voltage: 0 });
   };
 
@@ -158,5 +163,5 @@ export function useBluetooth() {
     };
   }, []);
 
-  return { connect, disconnect, isConnected, data, sendCommand, logs, deviceName: device?.name || "Simulador ELM327" };
+  return { connect, disconnect, isConnected, isEcuConnected, data, sendCommand, logs, deviceName: device?.name || "Simulador ELM327" };
 }

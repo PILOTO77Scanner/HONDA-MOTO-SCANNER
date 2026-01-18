@@ -7,7 +7,7 @@ import { useCreateSession } from "@/hooks/use-sessions";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
-  const { isConnected, connect, disconnect, data, deviceName } = useBluetooth();
+  const { isConnected, isEcuConnected, connect, disconnect, data, deviceName } = useBluetooth();
   const createSession = useCreateSession();
   const { toast } = useToast();
 
@@ -32,11 +32,24 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card/50 p-4 rounded-lg border border-border/50 backdrop-blur-sm">
         <div>
           <h1 className="text-2xl md:text-3xl text-glow">Honda Moto Scanner <span className="text-xs align-top opacity-50 font-sans tracking-normal">v1.2</span></h1>
-          <div className="flex items-center gap-2 mt-1">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500 shadow-[0_0_8px_#22c55e]" : "bg-red-500"}`} />
-            <span className="text-xs text-muted-foreground font-mono uppercase">
-              {isConnected ? `CONECTADO: ${deviceName}` : "DESCONECTADO"}
-            </span>
+          <div className="flex flex-wrap items-center gap-4 mt-2">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500 shadow-[0_0_8px_#22c55e]" : "bg-red-500"}`} />
+              <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-tighter">
+                ELM: {isConnected ? "OK" : "OFF"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${isEcuConnected ? "bg-green-500 shadow-[0_0_8px_#22c55e]" : "bg-red-500"}`} />
+              <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-tighter">
+                ECU: {isEcuConnected ? "OK" : "OFF"}
+              </span>
+            </div>
+            {deviceName && isConnected && (
+              <span className="text-[10px] text-primary font-mono uppercase truncate max-w-[100px]">
+                {deviceName}
+              </span>
+            )}
           </div>
         </div>
 
