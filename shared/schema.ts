@@ -1,18 +1,22 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+export const scanSessions = pgTable("scan_sessions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // e.g., "Scan Ford Ka"
+  adapterVersion: text("adapter_version"),
+  protocol: text("protocol"), // e.g., "ISO 14230-4 KWP"
+  startedAt: timestamp("started_at").defaultNow(),
+  endedAt: timestamp("ended_at"),
+  summary: jsonb("summary"), // Store DTCs found or max values
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertScanSessionSchema = createInsertSchema(scanSessions).omit({ 
+  id: true, 
+  startedAt: true,
+  endedAt: true 
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type ScanSession = typeof scanSessions.$inferSelect;
+export type InsertScanSession = z.infer<typeof insertScanSessionSchema>;
