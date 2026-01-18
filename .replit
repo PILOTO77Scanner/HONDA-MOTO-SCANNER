@@ -19,7 +19,6 @@ build = ["npm", "run", "build"]
 publicDir = "dist/public"
 
 [workflows]
-runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
