@@ -33,7 +33,7 @@ export function useBluetooth() {
 
   const connect = async () => {
     try {
-      if (!navigator.bluetooth) {
+      if (!(navigator as any).bluetooth) {
         // Fallback to simulation mode
         console.warn("Web Bluetooth API not available, starting simulation");
         toast({
@@ -46,7 +46,7 @@ export function useBluetooth() {
         return;
       }
 
-      const device = await navigator.bluetooth.requestDevice({
+      const device = await (navigator as any).bluetooth.requestDevice({
         filters: [
           { services: [SERVICE_UUID] },
           { services: [ALT_SERVICE_UUID] }
