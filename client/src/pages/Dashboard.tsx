@@ -15,9 +15,9 @@ export default function Dashboard() {
     if (!isConnected) return;
     
     createSession.mutate({
-      name: `Sessão ${new Date().toLocaleTimeString()}`,
+      name: `Sessão Honda ${new Date().toLocaleTimeString()}`,
       adapterVersion: "ELM327 v2.1",
-      protocol: "ISO 14230-4 KWP",
+      protocol: "ISO 14230-4 KWP (Honda)",
       summary: data
     }, {
       onSuccess: () => {
@@ -31,7 +31,7 @@ export default function Dashboard() {
       {/* Header / Status Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card/50 p-4 rounded-lg border border-border/50 backdrop-blur-sm">
         <div>
-          <h1 className="text-2xl md:text-3xl text-glow">CyberDash <span className="text-xs align-top opacity-50 font-sans tracking-normal">v1.0</span></h1>
+          <h1 className="text-2xl md:text-3xl text-glow">Honda Moto Scanner <span className="text-xs align-top opacity-50 font-sans tracking-normal">v1.2</span></h1>
           <div className="flex items-center gap-2 mt-1">
             <div className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500 shadow-[0_0_8px_#22c55e]" : "bg-red-500"}`} />
             <span className="text-xs text-muted-foreground font-mono uppercase">
@@ -69,10 +69,10 @@ export default function Dashboard() {
           <Gauge 
             value={data.rpm} 
             min={0} 
-            max={8000} 
+            max={15000} 
             label="Rotações" 
             unit="RPM" 
-            warningThreshold={6500}
+            warningThreshold={12000}
           />
         </Card>
 

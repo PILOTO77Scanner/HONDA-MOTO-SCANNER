@@ -73,13 +73,16 @@ export function useBluetooth() {
       setDevice(device);
       setIsConnected(true);
       
-      // Initialize ELM327
+      // Initialize ELM327 for Honda (KWP2000 Fast Init)
       await sendCommand("AT Z");     // Reset
-      await sendCommand("AT SP 0");  // Auto protocol
+      await sendCommand("AT E0");    // Echo off
+      await sendCommand("AT L0");    // Linefeeds off
+      await sendCommand("AT ST 32"); // Set timeout
+      await sendCommand("AT SP 5");  // Protocol 5 (ISO 14230-4 KWP Fast Init)
       
       toast({
-        title: "Conectado",
-        description: `Conectado a ${device.name}`,
+        title: "Honda Conectada",
+        description: `Protocolo KWP2000 Ativo em ${device.name}`,
       });
 
       // Start polling loop
@@ -118,7 +121,7 @@ export function useBluetooth() {
         setTimeout(() => {
             let response = "NODATA";
             if (cmd === "AT Z") response = "ELM327 v2.1";
-            if (cmd === "AT SP 0") response = "OK";
+            if (cmd === "AT SP 5") response = "OK";
             if (cmd === "01 0C") response = `41 0C ${Math.floor(data.rpm * 4).toString(16).toUpperCase()}`; // Mock RPM hex
             if (cmd === "01 0D") response = `41 0D ${data.speed.toString(16).toUpperCase()}`; // Mock Speed hex
             
@@ -130,10 +133,10 @@ export function useBluetooth() {
   const startSimulation = () => {
     simulationRef.current = setInterval(() => {
       setData(prev => {
-        // Randomize slightly
-        const newRpm = Math.max(800, Math.min(7000, prev.rpm + (Math.random() * 200 - 100)));
-        const newSpeed = Math.max(0, Math.min(220, prev.speed + (Math.random() * 10 - 4)));
-        const newTemp = Math.min(110, Math.max(80, prev.coolantTemp + (Math.random() * 2 - 1)));
+        // Randomize slightly - Moto high RPM
+        const newRpm = Math.max(1200, Math.min(14000, prev.rpm + (Math.random() * 500 - 200)));
+        const newSpeed = Math.max(0, Math.min(299, prev.speed + (Math.random() * 15 - 5)));
+        const newTemp = Math.min(105, Math.max(70, prev.coolantTemp + (Math.random() * 2 - 1)));
         
         return {
           rpm: Math.floor(newRpm),
