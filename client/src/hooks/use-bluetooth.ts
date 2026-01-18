@@ -11,7 +11,7 @@ const WRITE_CHAR_UUID = 0xfff2;
 interface OBDData {
   rpm: number;
   speed: number;
-  coolantTemp: number;
+  oilTemp: number;
   voltage: number;
 }
 
@@ -20,7 +20,7 @@ export function useBluetooth() {
   const [isEcuConnected, setIsEcuConnected] = useState(false);
   const [device, setDevice] = useState<BluetoothDevice | null>(null);
   const [characteristic, setCharacteristic] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
-  const [data, setData] = useState<OBDData>({ rpm: 0, speed: 0, coolantTemp: 0, voltage: 12.4 });
+  const [data, setData] = useState<OBDData>({ rpm: 0, speed: 0, oilTemp: 0, voltage: 12.4 });
   const [logs, setLogs] = useState<{ type: 'tx' | 'rx', message: string, timestamp: number }[]>([]);
   const { toast } = useToast();
   
@@ -113,7 +113,7 @@ export function useBluetooth() {
     setDevice(null);
     setIsConnected(false);
     setIsEcuConnected(false);
-    setData({ rpm: 0, speed: 0, coolantTemp: 0, voltage: 0 });
+    setData({ rpm: 0, speed: 0, oilTemp: 0, voltage: 0 });
   };
 
   const sendCommand = async (cmd: string) => {
@@ -141,12 +141,12 @@ export function useBluetooth() {
         // Randomize slightly - Moto high RPM
         const newRpm = Math.max(1200, Math.min(14000, prev.rpm + (Math.random() * 500 - 200)));
         const newSpeed = Math.max(0, Math.min(299, prev.speed + (Math.random() * 15 - 5)));
-        const newTemp = Math.min(105, Math.max(70, prev.coolantTemp + (Math.random() * 2 - 1)));
+        const newTemp = Math.min(130, Math.max(70, prev.oilTemp + (Math.random() * 2 - 1)));
         
         return {
           rpm: Math.floor(newRpm),
           speed: Math.floor(newSpeed),
-          coolantTemp: Math.floor(newTemp),
+          oilTemp: Math.floor(newTemp),
           voltage: 13.8 + (Math.random() * 0.4 - 0.2)
         };
       });

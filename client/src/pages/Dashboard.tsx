@@ -102,17 +102,17 @@ export default function Dashboard() {
           />
         </Card>
 
-        {/* Temp */}
+        {/* Oil Temp */}
         <Card className="bg-card/40 border-primary/20 hover:border-primary/50 transition-colors backdrop-blur-sm relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
           <Gauge 
-            value={data.coolantTemp} 
+            value={data.oilTemp} 
             min={40} 
-            max={130} 
-            label="Temp. Água" 
+            max={150} 
+            label="Temp. Óleo" 
             unit="°C" 
             color="var(--accent)"
-            warningThreshold={110}
+            warningThreshold={125}
           />
         </Card>
       </div>
