@@ -9,34 +9,34 @@
   --font-sans: 'Rajdhani', sans-serif;
   --font-mono: 'Share Tech Mono', monospace;
 
-  /* Honda Moto Scanner Theme */
-  --background: 0 0% 5%;           /* Black background */
-  --foreground: 0 0% 95%;          /* Off-white text */
+  /* Cyberpunk / Automotive Dark Palette - Blue */
+  --background: 220 15% 10%;       /* Very dark grey-blue */
+  --foreground: 180 100% 90%;      /* Cyan-white text */
 
-  --card: 0 0% 10%;
-  --card-foreground: 0 0% 95%;
+  --card: 220 15% 13%;
+  --card-foreground: 180 100% 90%;
 
-  --popover: 0 0% 5%;
-  --popover-foreground: 0 0% 95%;
+  --popover: 220 15% 10%;
+  --popover-foreground: 180 100% 90%;
 
-  --primary: 0 100% 50%;           /* Honda Red */
-  --primary-foreground: 0 0% 100%;
+  --primary: 180 100% 50%;         /* Neon Cyan */
+  --primary-foreground: 220 15% 10%;
 
-  --secondary: 0 0% 20%;           /* Dark grey */
-  --secondary-foreground: 0 0% 95%;
+  --secondary: 320 100% 50%;       /* Neon Pink/Magenta */
+  --secondary-foreground: 220 15% 10%;
 
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 60%;
+  --muted: 215 20% 20%;
+  --muted-foreground: 180 20% 60%;
 
-  --accent: 0 100% 40%;            /* Darker Red */
-  --accent-foreground: 0 0% 100%;
+  --accent: 45 100% 50%;           /* Neon Yellow/Warning */
+  --accent-foreground: 220 15% 10%;
 
-  --destructive: 0 84% 60%;
+  --destructive: 0 100% 60%;       /* Neon Red */
   --destructive-foreground: 210 40% 98%;
 
-  --border: 0 0% 20%;
-  --input: 0 0% 15%;
-  --ring: 0 100% 50%;
+  --border: 180 30% 20%;
+  --input: 215 20% 20%;
+  --ring: 180 100% 50%;
 
   --radius: 0.25rem;
 }
