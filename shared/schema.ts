@@ -4,12 +4,12 @@ import { z } from "zod";
 
 export const scanSessions = pgTable("scan_sessions", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(), // e.g., "Scan Ford Ka"
+  name: text("name").notNull(),
   adapterVersion: text("adapter_version"),
-  protocol: text("protocol"), // e.g., "ISO 14230-4 KWP"
+  protocol: text("protocol"),
   startedAt: timestamp("started_at").defaultNow(),
   endedAt: timestamp("ended_at"),
-  summary: jsonb("summary"), // Store DTCs found or max values
+  summary: jsonb("summary"),
 });
 
 export const insertScanSessionSchema = createInsertSchema(scanSessions).omit({ 
