@@ -89,19 +89,6 @@ export default function Dashboard() {
           />
         </Card>
 
-        {/* Speed */}
-        <Card className="bg-card/40 border-primary/20 hover:border-primary/50 transition-colors backdrop-blur-sm relative overflow-hidden">
-          <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
-          <Gauge 
-            value={data.speed} 
-            min={0} 
-            max={240} 
-            label="Velocidade" 
-            unit="KM/H" 
-            color="var(--secondary)"
-          />
-        </Card>
-
         {/* Oil Temp */}
         <Card className="bg-card/40 border-primary/20 hover:border-primary/50 transition-colors backdrop-blur-sm relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
@@ -152,6 +139,19 @@ export default function Dashboard() {
             label="Sonda Lambda (O2)" 
             unit="V" 
             color="var(--accent)"
+          />
+        </Card>
+
+        {/* Speed */}
+        <Card className="bg-card/40 border-primary/20 hover:border-primary/50 transition-colors backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+          <Gauge 
+            value={data.speed} 
+            min={0} 
+            max={240} 
+            label="Velocidade" 
+            unit="KM/H" 
+            color="var(--secondary)"
           />
         </Card>
       </div>
