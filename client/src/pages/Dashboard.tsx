@@ -7,7 +7,7 @@ import { useCreateSession } from "@/hooks/use-sessions";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
-  const { isConnected, isEcuConnected, connect, disconnect, data, deviceName } = useBluetooth();
+  const { isConnected, isEcuConnected, connect, disconnect, data, deviceName, deviceModel } = useBluetooth();
   const createSession = useCreateSession();
   const { toast } = useToast();
 
@@ -15,7 +15,7 @@ export default function Dashboard() {
     if (!isConnected) return;
     
     createSession.mutate({
-      name: `Sessão Honda ${new Date().toLocaleTimeString()}`,
+      name: `Sessão ${deviceModel !== "Desconhecido" ? deviceModel : "Honda"} ${new Date().toLocaleTimeString()}`,
       adapterVersion: "ELM327 v2.1",
       protocol: "ISO 14230-4 KWP (Honda)",
       summary: data
@@ -32,6 +32,11 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card/50 p-4 rounded-lg border border-border/50 backdrop-blur-sm">
         <div>
           <h1 className="text-2xl md:text-3xl text-glow">Honda Moto Scanner <span className="text-xs align-top opacity-50 font-sans tracking-normal">v1.2</span></h1>
+          {isEcuConnected && (
+            <div className="text-primary font-bold text-sm mt-1 animate-pulse">
+              Moto Identificada: {deviceModel}
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-4 mt-2">
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500 shadow-[0_0_8px_#22c55e]" : "bg-red-500"}`} />

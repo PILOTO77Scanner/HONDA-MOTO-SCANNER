@@ -24,6 +24,7 @@ interface BluetoothContextType {
   data: OBDData;
   logs: { type: 'tx' | 'rx', message: string, timestamp: number }[];
   deviceName: string;
+  deviceModel: string;
   connect: () => Promise<void>;
   disconnect: () => void;
   sendCommand: (cmd: string) => Promise<string>;
@@ -34,6 +35,7 @@ const BluetoothContext = createContext<BluetoothContextType | null>(null);
 export function BluetoothProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [isEcuConnected, setIsEcuConnected] = useState(false);
+  const [deviceModel, setDeviceModel] = useState<string>("Desconhecido");
   const [device, setDevice] = useState<BluetoothDevice | null>(null);
   const [characteristic, setCharacteristic] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
   const [data, setData] = useState<OBDData>({ 
@@ -81,14 +83,19 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       const val = parseInt(parts[2], 16) * 0.005;
       if (!isNaN(val)) setData(prev => ({ ...prev, o2: parseFloat(val.toFixed(3)) }));
     }
-    if (response.includes("41 0F")) { // IAT
-      const parts = response.split(" ");
-      const val = parseInt(parts[2], 16) - 40;
-      if (!isNaN(val)) setData(prev => ({ ...prev, iat: val }));
+    if (response.includes("41 00")) { // Calibration / ID check
+      // Try to extract VIN or Model Info if possible
     }
-    if (response.includes("AT RV") || response.match(/^[0-9]+\.[0-9]+V/)) { // Voltage
-      const val = parseFloat(response.replace("V", ""));
-      if (!isNaN(val)) setData(prev => ({ ...prev, voltage: val }));
+    if (response.includes("09 02")) { // VIN
+      const vin = response.split(" ").slice(2).map(hex => String.fromCharCode(parseInt(hex, 16))).join("");
+      if (vin.length > 5) {
+        // Basic Honda VIN mapping
+        let model = "Honda";
+        if (vin.startsWith("9C2")) model = "Honda (Brasil)";
+        if (vin.includes("KC")) model = "Honda CG 150/160";
+        if (vin.includes("KD")) model = "Honda CB 250/300";
+        setDeviceModel(model);
+      }
     }
   }, []);
 
@@ -230,6 +237,11 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       
       setIsEcuConnected(isEcuOk);
       
+      if (isEcuOk) {
+        // Request VIN for model identification
+        await sendCommand("09 02");
+      }
+      
       toast({
         title: isEcuOk ? "Honda Conectada" : "Adaptador Conectado",
         description: isEcuOk 
@@ -278,6 +290,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       data,
       logs,
       deviceName: device?.name || (isConnected ? "Simulador ELM327" : "Desconectado"),
+      deviceModel,
       connect,
       disconnect,
       sendCommand
