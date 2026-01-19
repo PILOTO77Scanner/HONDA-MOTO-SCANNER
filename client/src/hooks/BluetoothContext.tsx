@@ -12,6 +12,10 @@ interface OBDData {
   speed: number;
   oilTemp: number;
   voltage: number;
+  tps: number;
+  map: number;
+  o2: number;
+  iat: number;
 }
 
 interface BluetoothContextType {
@@ -32,7 +36,16 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
   const [isEcuConnected, setIsEcuConnected] = useState(false);
   const [device, setDevice] = useState<BluetoothDevice | null>(null);
   const [characteristic, setCharacteristic] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
-  const [data, setData] = useState<OBDData>({ rpm: 0, speed: 0, oilTemp: 0, voltage: 12.4 });
+  const [data, setData] = useState<OBDData>({ 
+    rpm: 0, 
+    speed: 0, 
+    oilTemp: 0, 
+    voltage: 12.4,
+    tps: 0,
+    map: 0,
+    o2: 0,
+    iat: 0
+  });
   const [logs, setLogs] = useState<{ type: 'tx' | 'rx', message: string, timestamp: number }[]>([]);
   const { toast } = useToast();
   
@@ -52,6 +65,30 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       const parts = response.split(" ");
       const val = parseInt(parts[2], 16);
       if (!isNaN(val)) setData(prev => ({ ...prev, speed: val }));
+    }
+    if (response.includes("41 11")) { // TPS
+      const parts = response.split(" ");
+      const val = (parseInt(parts[2], 16) * 100) / 255;
+      if (!isNaN(val)) setData(prev => ({ ...prev, tps: Math.round(val) }));
+    }
+    if (response.includes("41 0B")) { // MAP
+      const parts = response.split(" ");
+      const val = parseInt(parts[2], 16);
+      if (!isNaN(val)) setData(prev => ({ ...prev, map: val }));
+    }
+    if (response.includes("41 14")) { // O2
+      const parts = response.split(" ");
+      const val = parseInt(parts[2], 16) * 0.005;
+      if (!isNaN(val)) setData(prev => ({ ...prev, o2: parseFloat(val.toFixed(3)) }));
+    }
+    if (response.includes("41 0F")) { // IAT
+      const parts = response.split(" ");
+      const val = parseInt(parts[2], 16) - 40;
+      if (!isNaN(val)) setData(prev => ({ ...prev, iat: val }));
+    }
+    if (response.includes("AT RV") || response.match(/^[0-9]+\.[0-9]+V/)) { // Voltage
+      const val = parseFloat(response.replace("V", ""));
+      if (!isNaN(val)) setData(prev => ({ ...prev, voltage: val }));
     }
   }, []);
 
@@ -77,6 +114,11 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
             if (cmd === "AT SP 5") response = "OK";
             if (cmd === "01 0C") response = `41 0C ${Math.floor(data.rpm * 4).toString(16).toUpperCase().padStart(4, '0')}`;
             if (cmd === "01 0D") response = `41 0D ${data.speed.toString(16).toUpperCase()}`;
+            if (cmd === "01 11") response = `41 11 ${Math.floor((data.tps * 255) / 100).toString(16).toUpperCase()}`;
+            if (cmd === "01 0B") response = `41 0B ${data.map.toString(16).toUpperCase()}`;
+            if (cmd === "01 14") response = `41 14 ${Math.floor(data.o2 / 0.005).toString(16).toUpperCase()}`;
+            if (cmd === "01 0F") response = `41 0F ${(data.iat + 40).toString(16).toUpperCase()}`;
+            if (cmd === "AT RV") response = `${data.voltage.toFixed(1)}V`;
             
             addLog('rx', response);
             handleResponse(response);
@@ -92,19 +134,31 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
     
     simulationRef.current = setInterval(async () => {
       if (device) {
-        await sendCommand("01 0C");
+        await sendCommand("01 0C"); // RPM
         await new Promise(r => setTimeout(r, 100));
-        await sendCommand("01 0D");
+        await sendCommand("01 0D"); // Speed
         await new Promise(r => setTimeout(r, 100));
-        await sendCommand("01 05");
+        await sendCommand("01 11"); // TPS
         await new Promise(r => setTimeout(r, 100));
-        await sendCommand("AT RV");
+        await sendCommand("01 0B"); // MAP
+        await new Promise(r => setTimeout(r, 100));
+        await sendCommand("01 14"); // O2
+        await new Promise(r => setTimeout(r, 100));
+        await sendCommand("01 0F"); // IAT
+        await new Promise(r => setTimeout(r, 100));
+        await sendCommand("01 05"); // Engine Temp
+        await new Promise(r => setTimeout(r, 100));
+        await sendCommand("AT RV"); // Voltage
       } else {
         setData(prev => ({
           rpm: Math.floor(Math.max(1200, Math.min(14000, prev.rpm + (Math.random() * 500 - 200)))),
           speed: Math.floor(Math.max(0, Math.min(299, prev.speed + (Math.random() * 15 - 5)))),
           oilTemp: Math.floor(Math.min(130, Math.max(70, prev.oilTemp + (Math.random() * 2 - 1)))),
-          voltage: 13.8 + (Math.random() * 0.4 - 0.2)
+          voltage: 13.8 + (Math.random() * 0.4 - 0.2),
+          tps: Math.floor(Math.random() * 100),
+          map: 30 + Math.floor(Math.random() * 70),
+          o2: 0.1 + (Math.random() * 0.8),
+          iat: 25 + Math.floor(Math.random() * 15)
         }));
       }
     }, 1000);

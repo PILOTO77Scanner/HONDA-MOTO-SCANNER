@@ -115,6 +115,45 @@ export default function Dashboard() {
             warningThreshold={125}
           />
         </Card>
+
+        {/* TPS Gauge */}
+        <Card className="bg-card/40 border-primary/20 hover:border-primary/50 transition-colors backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+          <Gauge 
+            value={data.tps} 
+            min={0} 
+            max={100} 
+            label="Borboleta (TPS)" 
+            unit="%" 
+            color="var(--primary)"
+          />
+        </Card>
+
+        {/* MAP Gauge */}
+        <Card className="bg-card/40 border-primary/20 hover:border-primary/50 transition-colors backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+          <Gauge 
+            value={data.map} 
+            min={0} 
+            max={200} 
+            label="Pressão (MAP)" 
+            unit="kPa" 
+            color="var(--secondary)"
+          />
+        </Card>
+
+        {/* O2 Gauge */}
+        <Card className="bg-card/40 border-primary/20 hover:border-primary/50 transition-colors backdrop-blur-sm relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+          <Gauge 
+            value={data.o2} 
+            min={0} 
+            max={1.2} 
+            label="Sonda Lambda (O2)" 
+            unit="V" 
+            color="var(--accent)"
+          />
+        </Card>
       </div>
 
       {/* Secondary Data Strip */}
@@ -124,12 +163,12 @@ export default function Dashboard() {
           <span className="text-xl font-mono text-primary font-bold">{data.voltage.toFixed(1)} V</span>
         </div>
         <div className="bg-card/30 p-4 rounded border border-border/30 flex flex-col items-center">
-          <span className="text-xs text-muted-foreground uppercase">Combustível</span>
-          <span className="text-xl font-mono text-primary font-bold">-- %</span>
+          <span className="text-xs text-muted-foreground uppercase">Ar Adm. (IAT)</span>
+          <span className="text-xl font-mono text-primary font-bold">{data.iat} °C</span>
         </div>
         <div className="bg-card/30 p-4 rounded border border-border/30 flex flex-col items-center">
           <span className="text-xs text-muted-foreground uppercase">Carga Motor</span>
-          <span className="text-xl font-mono text-primary font-bold">-- %</span>
+          <span className="text-xl font-mono text-primary font-bold">{Math.min(100, Math.round((data.map / 105) * 100))}%</span>
         </div>
         <div className="bg-card/30 p-4 rounded border border-border/30 flex flex-col items-center">
           <span className="text-xs text-muted-foreground uppercase">Protocolo</span>

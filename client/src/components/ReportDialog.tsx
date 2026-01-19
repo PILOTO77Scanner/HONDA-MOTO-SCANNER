@@ -104,6 +104,18 @@ export function ReportDialog({ session, trigger }: ReportDialogProps) {
                 <span className="font-mono font-bold text-black">{summary.tps || "N/A"} %</span>
               </div>
               <div className="flex justify-between border-b border-gray-200 py-2">
+                <span className="text-gray-700 font-medium">Pressão do Coletor (MAP)</span>
+                <span className="font-mono font-bold text-black">{summary.map || "N/A"} kPa</span>
+              </div>
+              <div className="flex justify-between border-b border-gray-200 py-2">
+                <span className="text-gray-700 font-medium">Sonda Lambda (O2)</span>
+                <span className="font-mono font-bold text-black">{summary.o2 || "N/A"} V</span>
+              </div>
+              <div className="flex justify-between border-b border-gray-200 py-2">
+                <span className="text-gray-700 font-medium">Temp. Ar Admissão (IAT)</span>
+                <span className="font-mono font-bold text-black">{summary.iat || "N/A"} °C</span>
+              </div>
+              <div className="flex justify-between border-b border-gray-200 py-2">
                 <span className="text-gray-700 font-medium">Tempo de Injeção</span>
                 <span className="font-mono font-bold text-black">{summary.injectionTime || "N/A"} ms</span>
               </div>
