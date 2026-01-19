@@ -46,7 +46,7 @@ export function ReportDialog({ session, trigger }: ReportDialogProps) {
                 <ShieldCheck className="w-8 h-8" />
                 Honda Diagnostic
               </h1>
-              <p className="text-sm text-gray-600 mt-1 font-medium">Relatório Técnico de Diagnóstico OBDII</p>
+              <p className="text-sm text-gray-600 mt-1 font-medium">Relatório Técnico - Modelos Honda (CG/CB/XRE 150-300cc)</p>
             </div>
             <div className="text-right text-black">
               <p className="font-bold text-lg">Sessão #{session.id}</p>
