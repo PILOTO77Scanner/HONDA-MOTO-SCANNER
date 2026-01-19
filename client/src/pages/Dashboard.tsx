@@ -65,16 +65,10 @@ export default function Dashboard() {
               Conectar
             </Button>
           ) : (
-            <>
-              <Button onClick={handleSaveSession} variant="secondary" className="flex-1 sm:flex-none" disabled={createSession.isPending}>
-                <Save className="w-4 h-4 mr-2" />
-                {createSession.isPending ? "Salvando..." : "Salvar"}
-              </Button>
-              <Button onClick={disconnect} variant="destructive" className="flex-1 sm:flex-none">
-                <Power className="w-4 h-4 mr-2" />
-                Parar
-              </Button>
-            </>
+            <Button onClick={disconnect} variant="destructive" className="flex-1 sm:flex-none">
+              <Power className="w-4 h-4 mr-2" />
+              Parar
+            </Button>
           )}
         </div>
       </div>

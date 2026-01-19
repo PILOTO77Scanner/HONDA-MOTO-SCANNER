@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateSession } from "@/hooks/use-sessions";
 
 // UUIDs for ELM327 / OBDII adapters (Standard Serial Port Profile)
 const SERVICE_UUID = "00001101-0000-1000-8000-00805f9b34fb";
@@ -50,8 +51,28 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
   });
   const [logs, setLogs] = useState<{ type: 'tx' | 'rx', message: string, timestamp: number }[]>([]);
   const { toast } = useToast();
+  const createSession = useCreateSession();
   
   const simulationRef = useRef<NodeJS.Timeout | null>(null);
+  const latestDataRef = useRef<OBDData>({ 
+    rpm: 0, 
+    speed: 0, 
+    oilTemp: 0, 
+    voltage: 12.4,
+    tps: 0,
+    map: 0,
+    o2: 0,
+    iat: 0
+  });
+
+  useEffect(() => {
+    latestDataRef.current = data;
+  }, [data]);
+
+  const latestDeviceModelRef = useRef<string>("Desconhecido");
+  useEffect(() => {
+    latestDeviceModelRef.current = deviceModel;
+  }, [deviceModel]);
 
   const addLog = useCallback((type: 'tx' | 'rx', message: string) => {
     setLogs(prev => [...prev.slice(-49), { type, message, timestamp: Date.now() }]);
@@ -263,6 +284,20 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
   };
 
   const disconnect = useCallback(() => {
+    // Auto-save session on disconnect
+    if (isConnected) {
+      createSession.mutate({
+        name: `Sessão ${latestDeviceModelRef.current !== "Desconhecido" ? latestDeviceModelRef.current : "Honda"} ${new Date().toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo" })}`,
+        adapterVersion: "ELM327 v2.1",
+        protocol: "ISO 14230-4 KWP (Honda)",
+        summary: latestDataRef.current
+      }, {
+        onSuccess: () => {
+          toast({ title: "Sessão Salva", description: "Dados registrados automaticamente no histórico." });
+        }
+      });
+    }
+
     if (device?.gatt?.connected) {
       device.gatt.disconnect();
     }
@@ -274,8 +309,8 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
     setCharacteristic(null);
     setIsConnected(false);
     setIsEcuConnected(false);
-    setData({ rpm: 0, speed: 0, oilTemp: 0, voltage: 12.4 });
-  }, [device]);
+    setData({ rpm: 0, speed: 0, oilTemp: 0, voltage: 12.4, tps: 0, map: 0, o2: 0, iat: 0 });
+  }, [device, isConnected, createSession, toast]);
 
   useEffect(() => {
     return () => {
