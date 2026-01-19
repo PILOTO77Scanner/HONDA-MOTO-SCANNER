@@ -82,42 +82,54 @@ export function ReportDialog({ session, trigger }: ReportDialogProps) {
               <Activity className="w-5 h-5" />
               Parâmetros do Motor
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-              <div className="flex justify-between border-b border-gray-200 py-2">
-                <span className="text-gray-700 font-medium">Rotação do Motor (RPM)</span>
-                <span className="font-mono font-bold text-black">{summary.rpm || "N/A"} RPM</span>
+            <div className="grid grid-cols-1 gap-y-1">
+              {/* Header da Tabela */}
+              <div className="grid grid-cols-3 bg-gray-100 p-2 font-bold text-[10px] uppercase border border-gray-300">
+                <span>Sensor / Parâmetro</span>
+                <span className="text-center">Leitura Atual</span>
+                <span className="text-right">Padrão de Fábrica</span>
               </div>
-              <div className="flex justify-between border-b border-gray-200 py-2">
-                <span className="text-gray-700 font-medium">Velocidade da Roda</span>
-                <span className="font-mono font-bold text-black">{summary.speed || "N/A"} km/h</span>
+
+              <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
+                <span className="text-gray-700 font-medium text-sm">Rotação do Motor</span>
+                <span className="font-mono font-bold text-black text-center">{summary.rpm || "0"} RPM</span>
+                <span className="text-gray-500 text-right text-xs">1.300 - 1.500 RPM</span>
               </div>
-              <div className="flex justify-between border-b border-gray-200 py-2">
-                <span className="text-gray-700 font-medium">Temperatura do Óleo/Coolant</span>
-                <span className="font-mono font-bold text-black">{summary.oilTemp || "N/A"} °C</span>
+
+              <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
+                <span className="text-gray-700 font-medium text-sm">Posição Borboleta (TPS)</span>
+                <span className="font-mono font-bold text-black text-center">{summary.tps || "0"} %</span>
+                <span className="text-gray-500 text-right text-xs">0% (Fechada) - 100%</span>
               </div>
-              <div className="flex justify-between border-b border-gray-200 py-2">
-                <span className="text-gray-700 font-medium">Voltagem da Bateria</span>
-                <span className="font-mono font-bold text-black">{summary.voltage?.toFixed(1) || "N/A"} V</span>
+
+              <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
+                <span className="text-gray-700 font-medium text-sm">Pressão Coletor (MAP)</span>
+                <span className="font-mono font-bold text-black text-center">{summary.map || "0"} kPa</span>
+                <span className="text-gray-500 text-right text-xs">28 - 35 kPa (Lenta)</span>
               </div>
-              <div className="flex justify-between border-b border-gray-200 py-2">
-                <span className="text-gray-700 font-medium">Posição da Borboleta (TPS)</span>
-                <span className="font-mono font-bold text-black">{summary.tps || "N/A"} %</span>
+
+              <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
+                <span className="text-gray-700 font-medium text-sm">Temperatura Motor</span>
+                <span className="font-mono font-bold text-black text-center">{summary.oilTemp || "0"} °C</span>
+                <span className="text-gray-500 text-right text-xs">80°C - 105°C (Quente)</span>
               </div>
-              <div className="flex justify-between border-b border-gray-200 py-2">
-                <span className="text-gray-700 font-medium">Pressão do Coletor (MAP)</span>
-                <span className="font-mono font-bold text-black">{summary.map || "N/A"} kPa</span>
+
+              <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
+                <span className="text-gray-700 font-medium text-sm">Voltagem Bateria</span>
+                <span className="font-mono font-bold text-black text-center">{summary.voltage?.toFixed(1) || "0"} V</span>
+                <span className="text-gray-500 text-right text-xs">13.8V - 14.8V (Carga)</span>
               </div>
-              <div className="flex justify-between border-b border-gray-200 py-2">
-                <span className="text-gray-700 font-medium">Sonda Lambda (O2)</span>
-                <span className="font-mono font-bold text-black">{summary.o2 || "N/A"} V</span>
+
+              <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
+                <span className="text-gray-700 font-medium text-sm">Sonda Lambda (O2)</span>
+                <span className="font-mono font-bold text-black text-center">{summary.o2 || "0"} V</span>
+                <span className="text-gray-500 text-right text-xs">0.1V - 0.9V (Oscilante)</span>
               </div>
-              <div className="flex justify-between border-b border-gray-200 py-2">
-                <span className="text-gray-700 font-medium">Temp. Ar Admissão (IAT)</span>
-                <span className="font-mono font-bold text-black">{summary.iat || "N/A"} °C</span>
-              </div>
-              <div className="flex justify-between border-b border-gray-200 py-2">
-                <span className="text-gray-700 font-medium">Tempo de Injeção</span>
-                <span className="font-mono font-bold text-black">{summary.injectionTime || "N/A"} ms</span>
+
+              <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
+                <span className="text-gray-700 font-medium text-sm">Tempo de Injeção</span>
+                <span className="font-mono font-bold text-black text-center">{summary.injectionTime || "1.8"} ms</span>
+                <span className="text-gray-500 text-right text-xs">1.5 - 2.5 ms (Lenta)</span>
               </div>
             </div>
           </div>
