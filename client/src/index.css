@@ -51,6 +51,27 @@
     background-size: 100% 100%, 100% 4px; /* Scanline effect */
   }
 
+  @media print {
+    body {
+      background: white !important;
+      color: black !important;
+      background-image: none !important;
+    }
+    .no-print {
+      display: none !important;
+    }
+    .print-only {
+      display: block !important;
+    }
+    main {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    header, nav, footer:not(.print-footer) {
+      display: none !important;
+    }
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     @apply font-bold tracking-wider uppercase text-primary drop-shadow-[0_0_5px_rgba(0,255,255,0.5)];
