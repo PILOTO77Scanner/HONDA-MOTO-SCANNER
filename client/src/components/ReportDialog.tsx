@@ -93,43 +93,49 @@ export function ReportDialog({ session, trigger }: ReportDialogProps) {
               <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
                 <span className="text-gray-700 font-medium text-sm">Rotação do Motor</span>
                 <span className="font-mono font-bold text-black text-center">{summary.rpm || "0"} RPM</span>
-                <span className="text-gray-500 text-right text-xs">1.300 - 1.500 RPM</span>
+                <span className="text-gray-500 text-right text-xs">1.300 - 1.600 RPM (Lenta)</span>
               </div>
 
               <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
                 <span className="text-gray-700 font-medium text-sm">Posição Borboleta (TPS)</span>
                 <span className="font-mono font-bold text-black text-center">{summary.tps || "0"} %</span>
-                <span className="text-gray-500 text-right text-xs">0% (Fechada) - 100%</span>
+                <span className="text-gray-500 text-right text-xs">0.0% - 0.5% (Fechada)</span>
               </div>
 
               <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
                 <span className="text-gray-700 font-medium text-sm">Pressão Coletor (MAP)</span>
                 <span className="font-mono font-bold text-black text-center">{summary.map || "0"} kPa</span>
-                <span className="text-gray-500 text-right text-xs">28 - 35 kPa (Lenta)</span>
+                <span className="text-gray-500 text-right text-xs">24 - 38 kPa (Lenta)</span>
               </div>
 
               <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
-                <span className="text-gray-700 font-medium text-sm">Temperatura Motor</span>
+                <span className="text-gray-700 font-medium text-sm">Temperatura Motor (EOT/ECT)</span>
                 <span className="font-mono font-bold text-black text-center">{summary.oilTemp || "0"} °C</span>
-                <span className="text-gray-500 text-right text-xs">80°C - 105°C (Quente)</span>
+                <span className="text-gray-500 text-right text-xs">70°C - 110°C (Operação)</span>
               </div>
 
               <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
                 <span className="text-gray-700 font-medium text-sm">Voltagem Bateria</span>
                 <span className="font-mono font-bold text-black text-center">{summary.voltage?.toFixed(1) || "0"} V</span>
-                <span className="text-gray-500 text-right text-xs">13.8V - 14.8V (Carga)</span>
+                <span className="text-gray-500 text-right text-xs">12.4V (Desl) / 14.5V (Carga)</span>
               </div>
 
               <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
                 <span className="text-gray-700 font-medium text-sm">Sonda Lambda (O2)</span>
                 <span className="font-mono font-bold text-black text-center">{summary.o2 || "0"} V</span>
-                <span className="text-gray-500 text-right text-xs">0.1V - 0.9V (Oscilante)</span>
+                <span className="text-gray-500 text-right text-xs">0.1V - 1.0V (Ciclando)</span>
               </div>
 
               <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
                 <span className="text-gray-700 font-medium text-sm">Tempo de Injeção</span>
                 <span className="font-mono font-bold text-black text-center">{summary.injectionTime || "1.8"} ms</span>
-                <span className="text-gray-500 text-right text-xs">1.5 - 2.5 ms (Lenta)</span>
+                <span className="text-gray-500 text-right text-xs">1.2 - 3.2 ms (Variável)</span>
+              </div>
+
+              <div className="grid grid-cols-3 border-b border-gray-200 py-2 px-2 items-center">
+                <span className="text-gray-700 font-medium text-sm">Temp. Ar Adm. (IAT)</span>
+                <span className="font-mono font-bold text-black text-center">{summary.iat || "0"} °C</span>
+                <span className="text-gray-500 text-right text-xs">10°C - 50°C (Ambiente)</span>
               </div>
             </div>
           </div>
