@@ -51,7 +51,7 @@ export function ReportDialog({ session, trigger }: ReportDialogProps) {
             <div className="text-right text-black">
               <p className="font-bold text-lg">Sessão #{session.id}</p>
               <p className="text-sm">
-                {session.startedAt ? format(new Date(session.startedAt), "dd/MM/yyyy HH:mm", { locale: ptBR }) : '-'}
+                {session.startedAt ? new Date(session.startedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }) : '-'}
               </p>
             </div>
           </div>
@@ -185,13 +185,9 @@ export function ReportDialog({ session, trigger }: ReportDialogProps) {
         </div>
 
         <div className="flex justify-end gap-3 mt-6 no-print">
-          <Button variant="outline" className="gap-2" onClick={() => {/* Download PDF logic if needed */}}>
-            <Download className="w-4 h-4" />
-            PDF
-          </Button>
-          <Button className="gap-2" onClick={handlePrint}>
+          <Button className="gap-2" onClick={() => window.print()}>
             <Printer className="w-4 h-4" />
-            Imprimir Relatório
+            Imprimir Relatório / Salvar PDF
           </Button>
         </div>
       </DialogContent>

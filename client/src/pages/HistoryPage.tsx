@@ -34,11 +34,11 @@ export default function HistoryPage() {
                   <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      {session.startedAt ? format(new Date(session.startedAt), "dd 'de' MMMM, yyyy", { locale: ptBR }) : '-'}
+                      {session.startedAt ? new Date(session.startedAt).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }) : '-'}
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {session.startedAt ? format(new Date(session.startedAt), "HH:mm", { locale: ptBR }) : '-'}
+                      {session.startedAt ? new Date(session.startedAt).toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo", hour: '2-digit', minute: '2-digit' }) : '-'}
                     </div>
                     <div className="flex items-center gap-1">
                       <Activity className="w-3 h-3" />
