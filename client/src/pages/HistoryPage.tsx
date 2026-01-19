@@ -1,8 +1,9 @@
 import { useSessions } from "@/hooks/use-sessions";
 import { Card } from "@/components/ui/card";
-import { Loader2, Calendar, Clock, Activity } from "lucide-react";
+import { Loader2, Calendar, Clock, Activity, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { ReportDialog } from "@/components/ReportDialog";
 
 export default function HistoryPage() {
   const { data: sessions, isLoading } = useSessions();
@@ -47,10 +48,11 @@ export default function HistoryPage() {
                 </div>
                 
                 <div className="flex items-center gap-4 border-t md:border-t-0 md:border-l border-border/50 pt-4 md:pt-0 md:pl-4">
-                   <div className="text-right">
+                  <div className="text-right mr-4">
                       <span className="block text-xs uppercase text-muted-foreground">Versão Adaptador</span>
                       <span className="font-mono text-sm">{session.adapterVersion}</span>
-                   </div>
+                  </div>
+                  <ReportDialog session={session} />
                 </div>
               </div>
             </Card>
