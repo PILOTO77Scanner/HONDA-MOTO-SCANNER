@@ -6,7 +6,11 @@ import { ptBR } from "date-fns/locale";
 import { ReportDialog } from "@/components/ReportDialog";
 
 export default function HistoryPage() {
-  const { data: sessions, isLoading } = useSessions();
+  const { data: unsortedSessions, isLoading } = useSessions();
+  
+  const sessions = unsortedSessions ? [...unsortedSessions].sort((a, b) => 
+    new Date(b.startedAt || 0).getTime() - new Date(a.startedAt || 0).getTime()
+  ) : [];
 
   if (isLoading) {
     return (
