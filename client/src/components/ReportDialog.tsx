@@ -72,7 +72,7 @@ export function ReportDialog({ session, trigger }: ReportDialogProps) {
             </div>
             <div>
               <p className="text-[10px] uppercase font-bold text-gray-500 mb-1 tracking-wider">Status Final</p>
-              <p className="font-bold text-black">CONCLUÍDO</p>
+              <p className="font-bold text-black uppercase">Concluído</p>
             </div>
           </div>
 
