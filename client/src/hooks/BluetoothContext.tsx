@@ -23,11 +23,13 @@ interface BluetoothContextType {
   isConnected: boolean;
   isEcuConnected: boolean;
   data: OBDData;
+  dtcs: { code: string; description: string }[];
   logs: { type: 'tx' | 'rx', message: string, timestamp: number }[];
   deviceName: string;
   deviceModel: string;
   connect: () => Promise<void>;
   disconnect: () => void;
+  clearErrors: () => Promise<void>;
   sendCommand: (cmd: string) => Promise<string>;
 }
 
@@ -37,6 +39,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [isEcuConnected, setIsEcuConnected] = useState(false);
   const [deviceModel, setDeviceModel] = useState<string>("Desconhecido");
+  const [dtcs, setDtcs] = useState<{ code: string; description: string }[]>([]);
   const [device, setDevice] = useState<BluetoothDevice | null>(null);
   const [characteristic, setCharacteristic] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
   const [data, setData] = useState<OBDData>({ 
@@ -107,16 +110,29 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
     if (response.includes("41 00")) { // Calibration / ID check
       // Try to extract VIN or Model Info if possible
     }
-    if (response.includes("09 02")) { // VIN
-      const vin = response.split(" ").slice(2).map(hex => String.fromCharCode(parseInt(hex, 16))).join("");
-      if (vin.length > 5) {
-        // Basic Honda VIN mapping
-        let model = "Honda";
-        if (vin.startsWith("9C2")) model = "Honda (Brasil)";
-        if (vin.includes("KC")) model = "Honda CG 150/160";
-        if (vin.includes("KD")) model = "Honda CB 250/300";
-        setDeviceModel(model);
+    if (response.includes("41 01")) { // DTC Count
+      const parts = response.split(" ");
+      const count = parseInt(parts[2], 16) & 0x7F;
+      if (count > 0 && dtcs.length === 0) {
+        // Mocking a DTC for simulation if it's simulation mode or real if we had 03
+        if (!device) {
+           setDtcs([{ code: "P0122", description: "TPS - Voltagem Baixa" }]);
+        }
+      } else if (count === 0) {
+        setDtcs([]);
       }
+    }
+    if (response.includes("43 ")) { // DTC Response
+      // Simplified DTC parsing for Honda
+      const parts = response.split(" ");
+      if (parts.length >= 4) {
+        const code = `P${parts[1]}${parts[2]}`;
+        setDtcs(prev => [...prev, { code, description: "Falha detectada no sistema" }]);
+      }
+    }
+    if (response.includes("44")) { // Clear Response
+      setDtcs([]);
+      toast({ title: "Sucesso", description: "Códigos de erro apagados." });
     }
   }, []);
 
@@ -175,6 +191,8 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         await sendCommand("01 0F"); // IAT
         await new Promise(r => setTimeout(r, 100));
         await sendCommand("01 05"); // Engine Temp
+        await new Promise(r => setTimeout(r, 100));
+        await sendCommand("01 01"); // Check DTCs
         await new Promise(r => setTimeout(r, 100));
         await sendCommand("AT RV"); // Voltage
       } else {
@@ -283,6 +301,16 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const clearErrors = async () => {
+    if (isConnected) {
+      await sendCommand("04");
+      if (!device) {
+        setDtcs([]);
+        toast({ title: "Sucesso", description: "Códigos de erro apagados (Simulado)." });
+      }
+    }
+  };
+
   const disconnect = useCallback(() => {
     // Auto-save session on disconnect
     if (isConnected) {
@@ -290,7 +318,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         name: `Sessão ${latestDeviceModelRef.current !== "Desconhecido" ? latestDeviceModelRef.current : "Honda"} ${new Date().toLocaleTimeString("pt-BR", { timeZone: "America/Sao_Paulo" })}`,
         adapterVersion: "ELM327 v2.1",
         protocol: "ISO 14230-4 KWP (Honda)",
-        summary: latestDataRef.current
+        summary: { ...latestDataRef.current, dtcs }
       }, {
         onSuccess: () => {
           toast({ title: "Sessão Salva", description: "Dados registrados automaticamente no histórico." });
@@ -323,11 +351,13 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       isConnected,
       isEcuConnected,
       data,
+      dtcs,
       logs,
       deviceName: device?.name || (isConnected ? "Simulador ELM327" : "Desconectado"),
       deviceModel,
       connect,
       disconnect,
+      clearErrors,
       sendCommand
     }}>
       {children}

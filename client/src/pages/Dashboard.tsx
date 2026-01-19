@@ -2,12 +2,12 @@ import { Gauge } from "@/components/Gauge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useBluetooth } from "@/hooks/use-bluetooth";
-import { Bluetooth, BluetoothOff, Save, Power } from "lucide-react";
+import { Bluetooth, BluetoothOff, Save, Power, Trash2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useCreateSession } from "@/hooks/use-sessions";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
-  const { isConnected, isEcuConnected, connect, disconnect, data, deviceName, deviceModel } = useBluetooth();
+  const { isConnected, isEcuConnected, connect, disconnect, data, dtcs, clearErrors, deviceName, deviceModel } = useBluetooth();
   const createSession = useCreateSession();
   const { toast } = useToast();
 
@@ -75,6 +75,44 @@ export default function Dashboard() {
 
       {/* Main Gauges Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* DTC Status Card */}
+        {isConnected && (
+          <Card className={`col-span-1 md:col-span-2 lg:col-span-3 p-4 flex flex-col md:flex-row items-center justify-between gap-4 border-2 ${dtcs.length > 0 ? "border-red-500/50 bg-red-500/10" : "border-green-500/50 bg-green-500/10"}`}>
+            <div className="flex items-center gap-3">
+              {dtcs.length > 0 ? (
+                <AlertCircle className="w-8 h-8 text-red-500 animate-pulse" />
+              ) : (
+                <CheckCircle2 className="w-8 h-8 text-green-500" />
+              )}
+              <div>
+                <h3 className="font-bold text-lg">
+                  {dtcs.length > 0 ? `${dtcs.length} Código(s) de Erro Detectado(s)` : "Sistema sem Erros"}
+                </h3>
+                {dtcs.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {dtcs.map((dtc, i) => (
+                      <span key={i} className="bg-red-500 text-white px-2 py-0.5 rounded text-xs font-mono font-bold">
+                        {dtc.code}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            {dtcs.length > 0 && (
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={clearErrors}
+                className="hover-elevate no-print"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Apagar Erros (Reset)
+              </Button>
+            )}
+          </Card>
+        )}
+
         {/* RPM - Big Card */}
         <Card className="col-span-1 md:col-span-2 lg:col-span-1 bg-card/40 border-primary/20 hover:border-primary/50 transition-colors backdrop-blur-sm relative overflow-hidden group">
           <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
