@@ -223,25 +223,30 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       }
 
       const device = await (navigator as any).bluetooth.requestDevice({
-        filters: [{ services: [SERVICE_UUID] }, { services: [ALT_SERVICE_UUID] }],
-        optionalServices: [SERVICE_UUID, ALT_SERVICE_UUID]
+        acceptAllDevices: true,
+        optionalServices: [SERVICE_UUID, ALT_SERVICE_UUID, "00001101-0000-1000-8000-00805f9b34fb", 0xfff0]
       });
 
       const server = await device.gatt?.connect();
-      if (!server) throw new Error("GATT Server not found");
+      if (!server) throw new Error("Servidor GATT não encontrado");
 
       let service;
       try {
         service = await server.getPrimaryService(SERVICE_UUID);
-      } catch {
-        service = await server.getPrimaryService(ALT_SERVICE_UUID);
+      } catch (err) {
+        try {
+          service = await server.getPrimaryService(ALT_SERVICE_UUID);
+        } catch (err2) {
+          const services = await server.getPrimaryServices();
+          service = services[0];
+        }
       }
 
-      if (!service) throw new Error("Service not found");
+      if (!service) throw new Error("Serviço não encontrado");
 
       const characteristics = await service.getCharacteristics();
-      const writeChar = characteristics.find(c => c.uuid === WRITE_CHAR_UUID) || characteristics[0];
-      const readChar = characteristics.find(c => c.uuid === READ_CHAR_UUID) || characteristics[0];
+      const writeChar = characteristics.find(c => c.uuid.includes("fff2") || c.properties.write) || characteristics[0];
+      const readChar = characteristics.find(c => c.uuid.includes("fff1") || c.properties.notify || c.properties.read) || characteristics[0];
 
       if (!writeChar || !readChar) throw new Error("Bluetooth characteristics not found");
       
@@ -260,14 +265,22 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       
       await sendCommand("AT Z");
       await new Promise(r => setTimeout(r, 1000));
+      await sendCommand("AT D"); // Set to default
       await sendCommand("AT E0");
       await sendCommand("AT L0");
-      await sendCommand("AT SP 5");
+      await sendCommand("AT ST 32"); // Set timeout
+      await sendCommand("AT SP 0"); // Automatic protocol search first
       await new Promise(r => setTimeout(r, 500));
-      
-      const initResp = await sendCommand("01 00");
+
+      let initResp = await sendCommand("01 00");
       let isEcuOk = initResp && !initResp.includes("NO DATA") && !initResp.includes("ERROR") && !initResp.includes("?");
-      
+
+      if (!isEcuOk) {
+        await sendCommand("AT SP 5"); // Force ISO 14230-4 (KWP FAST)
+        initResp = await sendCommand("01 00");
+        isEcuOk = initResp && !initResp.includes("NO DATA");
+      }
+
       if (!isEcuOk) {
         await sendCommand("AT SH 81 10 F1");
         const hondaInit = await sendCommand("21 01");
