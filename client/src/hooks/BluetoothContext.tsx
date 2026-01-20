@@ -46,7 +46,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
     rpm: 0, 
     speed: 0, 
     oilTemp: 0, 
-    voltage: 12.4,
+    voltage: 0,
     tps: 0,
     map: 0,
     o2: 0,
@@ -61,7 +61,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
     rpm: 0, 
     speed: 0, 
     oilTemp: 0, 
-    voltage: 12.4,
+    voltage: 0,
     tps: 0,
     map: 0,
     o2: 0,
@@ -373,7 +373,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
     setCharacteristic(null);
     setIsConnected(false);
     setIsEcuConnected(false);
-    setData({ rpm: 0, speed: 0, oilTemp: 0, voltage: 12.4, tps: 0, map: 0, o2: 0, iat: 0 });
+    setData({ rpm: 0, speed: 0, oilTemp: 0, voltage: 0, tps: 0, map: 0, o2: 0, iat: 0 });
   }, [device, isConnected, createSession, toast]);
 
   useEffect(() => {
