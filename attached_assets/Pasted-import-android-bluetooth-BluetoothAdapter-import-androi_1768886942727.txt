@@ -1,0 +1,56 @@
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothSocket
+import java.io.IOException
+import java.util.UUID
+
+class OBDConnectionManager(private val deviceAddress: String) {
+
+    // UUID padrão para comunicação serial (SPP) usada pelo ELM327
+    private val MY_UUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+    private var socket: BluetoothSocket? = null
+
+    fun connectAndReadRPM() {
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        val device: BluetoothDevice = bluetoothAdapter.getRemoteDevice(deviceAddress)
+
+        try {
+            // 1. Abrindo a conexão via RFCOMM
+            socket = device.createRfcommSocketToServiceRecord(MY_UUID)
+            socket?.connect()
+            println("Conectado ao ELM327!")
+
+            val inputStream = socket?.inputStream
+            val outputStream = socket?.outputStream
+
+            // 2. Inicialização (Comandos AT)
+            sendCommand(outputStream, "AT Z\r")    // Reset
+            sendCommand(outputStream, "AT SP 0\r") // Auto-protocolo
+            
+            // 3. Loop de leitura de RPM (PID 010C)
+            while (socket?.isConnected == true) {
+                sendCommand(outputStream, "01 0C\r")
+                val response = readResponse(inputStream)
+                
+                // Exemplo simplificado de parsing:
+                // Se a resposta for "41 0C 1A F8", extraímos os bytes 1A e F8
+                println("Resposta RPM: $response")
+                Thread.sleep(1000)
+            }
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun sendCommand(out: java.io.OutputStream?, cmd: String) {
+        out?.write(cmd.toByteArray())
+        out?.flush()
+    }
+
+    private fun readResponse(inputStream: java.io.InputStream?): String {
+        val buffer = ByteArray(1024)
+        val bytes = inputStream?.read(buffer) ?: 0
+        return String(buffer, 0, bytes)
+    }
+}
