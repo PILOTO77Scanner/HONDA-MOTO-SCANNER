@@ -284,36 +284,19 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         });
       }
       
-      await sendCommand("AT Z");
+      // 2. Inicialização (Comandos AT) baseada no OBDConnectionManager
+      await sendCommand("AT Z");    // Reset
       await new Promise(r => setTimeout(r, 1000));
-      await sendCommand("AT D");
-      await sendCommand("AT Z");
+      await sendCommand("AT D");    // Defaults
+      await sendCommand("AT E0");   // Echo off
+      await sendCommand("AT L0");   // Linefeeds off
+      await sendCommand("AT S0");   // Spaces off
+      await sendCommand("AT SP 0"); // Auto-protocolo (conforme código Android fornecido)
       await new Promise(r => setTimeout(r, 1000));
-      await sendCommand("AT E0");
-      await sendCommand("AT L0");
-      await sendCommand("AT S0");
-      await sendCommand("AT ST FF"); // Max timeout for initialization
-      // Scan protocols from newest (CAN) to oldest (KWP)
-      const protocols = [
-        { id: "6", name: "ISO 15765-4 (CAN 11/500)", header: "7E0" }, // New Honda (2020+)
-        { id: "7", name: "ISO 15765-4 (CAN 29/500)", header: "18DAF110" },
-        { id: "5", name: "ISO 14230-4 (KWP Fast)", header: "8110F1" }, // Standard Honda (2010-2020)
-        { id: "4", name: "ISO 14230-4 (KWP 5Baud)", header: "8110F1" }, // Old Honda
-      ];
-
-      let connectedProtocol = null;
-
-      for (const proto of protocols) {
-        await sendCommand(`AT SP ${proto.id}`);
-        await sendCommand(`AT SH ${proto.header}`);
-        const resp = await sendCommand("01 00");
-        if (resp && !resp.includes("NO DATA") && !resp.includes("ERROR") && !resp.includes("?")) {
-          connectedProtocol = proto;
-          break;
-        }
-      }
-
-      let isEcuOk = !!connectedProtocol;
+      
+      // 3. Verificação de conexão com ECU usando PID 010C (RPM) como no loop do Android
+      const initResp = await sendCommand("01 0C");
+      let isEcuOk = initResp && !initResp.includes("NO DATA") && !initResp.includes("ERROR") && !initResp.includes("?");
 
       if (!isEcuOk) {
         await sendCommand("AT SH 81 10 F1");
