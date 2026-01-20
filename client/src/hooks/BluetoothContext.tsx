@@ -274,10 +274,12 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         await readChar.startNotifications();
         readChar.addEventListener('characteristicvaluechanged', (event: any) => {
           const value = new TextDecoder().decode(event.target.value);
-          const lines = value.split(/[\r\n]+/).filter(l => l.trim().length > 0);
-          for (const line of lines) {
-            addLog('rx', line);
-            handleResponse(line);
+          // Split by standard ELM327 prompt character '>' or newlines
+          const segments = value.split(/[>\r\n]+/).filter(l => l.trim().length > 0);
+          for (const segment of segments) {
+            const cleanSegment = segment.trim();
+            addLog('rx', cleanSegment);
+            handleResponse(cleanSegment);
           }
         });
       }
