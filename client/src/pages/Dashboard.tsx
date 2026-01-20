@@ -195,12 +195,10 @@ export default function Dashboard() {
 
       {/* Secondary Data Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {isConnected && data.voltage > 0 && (
-          <div className="bg-card/30 p-4 rounded border border-border/30 flex flex-col items-center">
-            <span className="text-xs text-muted-foreground uppercase">Bateria</span>
-            <span className="text-xl font-mono text-primary font-bold">{data.voltage.toFixed(1)} V</span>
-          </div>
-        )}
+        <div className="bg-card/30 p-4 rounded border border-border/30 flex flex-col items-center">
+          <span className="text-xs text-muted-foreground uppercase">Bateria</span>
+          <span className="text-xl font-mono text-primary font-bold">{data.voltage > 0 ? `${data.voltage.toFixed(1)} V` : "---"}</span>
+        </div>
         <div className="bg-card/30 p-4 rounded border border-border/30 flex flex-col items-center">
           <span className="text-xs text-muted-foreground uppercase">Ar Adm. (IAT)</span>
           <span className="text-xl font-mono text-primary font-bold">{data.iat} °C</span>
