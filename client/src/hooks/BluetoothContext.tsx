@@ -83,58 +83,65 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
 
   const handleResponse = useCallback((response: string) => {
     if (response.includes("41 0C")) { // RPM
-      const parts = response.split(" ");
-      const idx = parts.indexOf("0C");
-      if (idx !== -1 && parts.length > idx + 2) {
-        const val = parseInt(parts[idx+1] + parts[idx+2], 16) / 4;
+      const clean = response.replace(/\s/g, '');
+      const parts = clean.split("410C");
+      if (parts.length > 1) {
+        const hex = parts[1].substring(0, 4);
+        const val = parseInt(hex, 16) / 4;
         if (!isNaN(val)) setData(prev => ({ ...prev, rpm: val }));
       }
     }
     if (response.includes("41 0D")) { // Speed
-      const parts = response.split(" ");
-      const idx = parts.indexOf("0D");
-      if (idx !== -1 && parts.length > idx + 1) {
-        const val = parseInt(parts[idx+1], 16);
+      const clean = response.replace(/\s/g, '');
+      const parts = clean.split("410D");
+      if (parts.length > 1) {
+        const hex = parts[1].substring(0, 2);
+        const val = parseInt(hex, 16);
         if (!isNaN(val)) setData(prev => ({ ...prev, speed: val }));
       }
     }
     if (response.includes("41 11")) { // TPS
-      const parts = response.split(" ");
-      const idx = parts.indexOf("11");
-      if (idx !== -1 && parts.length > idx + 1) {
-        const val = (parseInt(parts[idx+1], 16) * 100) / 255;
+      const clean = response.replace(/\s/g, '');
+      const parts = clean.split("4111");
+      if (parts.length > 1) {
+        const hex = parts[1].substring(0, 2);
+        const val = (parseInt(hex, 16) * 100) / 255;
         if (!isNaN(val)) setData(prev => ({ ...prev, tps: Math.round(val) }));
       }
     }
     if (response.includes("41 0B")) { // MAP
-      const parts = response.split(" ");
-      const idx = parts.indexOf("0B");
-      if (idx !== -1 && parts.length > idx + 1) {
-        const val = parseInt(parts[idx+1], 16);
+      const clean = response.replace(/\s/g, '');
+      const parts = clean.split("410B");
+      if (parts.length > 1) {
+        const hex = parts[1].substring(0, 2);
+        const val = parseInt(hex, 16);
         if (!isNaN(val)) setData(prev => ({ ...prev, map: val }));
       }
     }
     if (response.includes("41 14")) { // O2
-      const parts = response.split(" ");
-      const idx = parts.indexOf("14");
-      if (idx !== -1 && parts.length > idx + 1) {
-        const val = parseInt(parts[idx+1], 16) * 0.005;
+      const clean = response.replace(/\s/g, '');
+      const parts = clean.split("4114");
+      if (parts.length > 1) {
+        const hex = parts[1].substring(0, 2);
+        const val = parseInt(hex, 16) * 0.005;
         if (!isNaN(val)) setData(prev => ({ ...prev, o2: parseFloat(val.toFixed(3)) }));
       }
     }
     if (response.includes("41 05")) { // Engine Temp (ECT)
-      const parts = response.split(" ");
-      const idx = parts.indexOf("05");
-      if (idx !== -1 && parts.length > idx + 1) {
-        const val = parseInt(parts[idx+1], 16) - 40;
+      const clean = response.replace(/\s/g, '');
+      const parts = clean.split("4105");
+      if (parts.length > 1) {
+        const hex = parts[1].substring(0, 2);
+        const val = parseInt(hex, 16) - 40;
         if (!isNaN(val)) setData(prev => ({ ...prev, oilTemp: val }));
       }
     }
     if (response.includes("41 0F")) { // IAT
-      const parts = response.split(" ");
-      const idx = parts.indexOf("0F");
-      if (idx !== -1 && parts.length > idx + 1) {
-        const val = parseInt(parts[idx+1], 16) - 40;
+      const clean = response.replace(/\s/g, '');
+      const parts = clean.split("410F");
+      if (parts.length > 1) {
+        const hex = parts[1].substring(0, 2);
+        const val = parseInt(hex, 16) - 40;
         if (!isNaN(val)) setData(prev => ({ ...prev, iat: val }));
       }
     }
@@ -277,13 +284,21 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       
       await sendCommand("AT Z");
       await new Promise(r => setTimeout(r, 1000));
-      await sendCommand("AT D"); // Set to default
-      await sendCommand("AT E0");
-      await sendCommand("AT L0");
-      await sendCommand("AT ST 32"); // Set timeout
-      await sendCommand("AT SP 0"); // Automatic protocol search first
+      await sendCommand("AT D");
+      await sendCommand("AT Z"); // Reset again to ensure clean state
+      await new Promise(r => setTimeout(r, 1000));
+      await sendCommand("AT E0"); // Echo off
+      await sendCommand("AT L0"); // Linefeeds off
+      await sendCommand("AT S0"); // Spaces off for faster parsing
+      await sendCommand("AT ST 64"); // Increased timeout for slow ECUs
+      await sendCommand("AT AT 1"); // Adaptive timing on
+      await sendCommand("AT SP 0"); // Automatic protocol
       await new Promise(r => setTimeout(r, 500));
 
+      // Attempt to wake up ECU
+      await sendCommand("01 00");
+      await new Promise(r => setTimeout(r, 200));
+      
       let initResp = await sendCommand("01 00");
       let isEcuOk = initResp && !initResp.includes("NO DATA") && !initResp.includes("ERROR") && !initResp.includes("?");
 
