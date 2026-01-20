@@ -82,7 +82,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleResponse = useCallback((response: string) => {
-    if (response.includes("41 0C")) { // RPM
+    if (response.includes("410C") || response.includes("41 0C")) { // RPM
       const clean = response.replace(/\s/g, '');
       const parts = clean.split("410C");
       if (parts.length > 1) {
@@ -91,7 +91,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         if (!isNaN(val)) setData(prev => ({ ...prev, rpm: val }));
       }
     }
-    if (response.includes("41 0D")) { // Speed
+    if (response.includes("410D") || response.includes("41 0D")) { // Speed
       const clean = response.replace(/\s/g, '');
       const parts = clean.split("410D");
       if (parts.length > 1) {
@@ -100,7 +100,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         if (!isNaN(val)) setData(prev => ({ ...prev, speed: val }));
       }
     }
-    if (response.includes("41 11")) { // TPS
+    if (response.includes("4111") || response.includes("41 11")) { // TPS
       const clean = response.replace(/\s/g, '');
       const parts = clean.split("4111");
       if (parts.length > 1) {
@@ -109,7 +109,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         if (!isNaN(val)) setData(prev => ({ ...prev, tps: Math.round(val) }));
       }
     }
-    if (response.includes("41 0B")) { // MAP
+    if (response.includes("410B") || response.includes("41 0B")) { // MAP
       const clean = response.replace(/\s/g, '');
       const parts = clean.split("410B");
       if (parts.length > 1) {
@@ -118,7 +118,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         if (!isNaN(val)) setData(prev => ({ ...prev, map: val }));
       }
     }
-    if (response.includes("41 14")) { // O2
+    if (response.includes("4114") || response.includes("41 14")) { // O2
       const clean = response.replace(/\s/g, '');
       const parts = clean.split("4114");
       if (parts.length > 1) {
@@ -127,7 +127,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         if (!isNaN(val)) setData(prev => ({ ...prev, o2: parseFloat(val.toFixed(3)) }));
       }
     }
-    if (response.includes("41 05")) { // Engine Temp (ECT)
+    if (response.includes("4105") || response.includes("41 05")) { // Engine Temp (ECT)
       const clean = response.replace(/\s/g, '');
       const parts = clean.split("4105");
       if (parts.length > 1) {
@@ -136,7 +136,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         if (!isNaN(val)) setData(prev => ({ ...prev, oilTemp: val }));
       }
     }
-    if (response.includes("41 0F")) { // IAT
+    if (response.includes("410F") || response.includes("41 0F")) { // IAT
       const clean = response.replace(/\s/g, '');
       const parts = clean.split("410F");
       if (parts.length > 1) {
@@ -287,19 +287,19 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       await sendCommand("AT Z");
       await new Promise(r => setTimeout(r, 1000));
       await sendCommand("AT D");
-      await sendCommand("AT Z"); // Reset again to ensure clean state
+      await sendCommand("AT Z");
       await new Promise(r => setTimeout(r, 1000));
-      await sendCommand("AT E0"); // Echo off
-      await sendCommand("AT L0"); // Linefeeds off
-      await sendCommand("AT S0"); // Spaces off for faster parsing
-      await sendCommand("AT ST 64"); // Increased timeout for slow ECUs
-      await sendCommand("AT AT 1"); // Adaptive timing on
-      await sendCommand("AT SP 0"); // Automatic protocol
-      await new Promise(r => setTimeout(r, 500));
+      await sendCommand("AT E0");
+      await sendCommand("AT L0");
+      await sendCommand("AT S0");
+      await sendCommand("AT ST FF"); // Max timeout for initialization
+      await sendCommand("AT SP 5"); // Force Protocol 5 (ISO 14230-4 KWP Fast Init)
+      await new Promise(r => setTimeout(r, 1000));
 
-      // Attempt to wake up ECU
+      // ECU wakeup sequence for KWP
+      await sendCommand("AT SH 81 10 F1");
       await sendCommand("01 00");
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 500));
       
       let initResp = await sendCommand("01 00");
       let isEcuOk = initResp && !initResp.includes("NO DATA") && !initResp.includes("ERROR") && !initResp.includes("?");
