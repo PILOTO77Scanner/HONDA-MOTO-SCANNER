@@ -215,31 +215,14 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
           await sendCommand(cmd);
           await new Promise(r => setTimeout(r, 75)); // Slightly faster polling
         }
-      } else if (!device && isConnected) {
-        setData(prev => ({
-          rpm: Math.floor(Math.max(1200, Math.min(14000, prev.rpm + (Math.random() * 500 - 200)))),
-          speed: Math.floor(Math.max(0, Math.min(299, prev.speed + (Math.random() * 15 - 5)))),
-          oilTemp: Math.floor(Math.min(130, Math.max(70, prev.oilTemp + (Math.random() * 2 - 1)))),
-          voltage: 13.8 + (Math.random() * 0.4 - 0.2),
-          tps: Math.floor(Math.random() * 100),
-          map: 30 + Math.floor(Math.random() * 70),
-          o2: 0.1 + (Math.random() * 0.8),
-          iat: 25 + Math.floor(Math.random() * 15)
-        }));
       }
     }, 1000);
-  }, [device, sendCommand]);
+  }, [device, isConnected, sendCommand]);
 
   const connect = async () => {
     try {
       if (!(navigator as any).bluetooth) {
-        toast({
-          title: "Modo de Simulação Ativo",
-          description: "Bluetooth não detectado. Usando dados simulados.",
-        });
-        setIsConnected(true);
-        startPolling();
-        return;
+        throw new Error("Seu navegador não suporta Bluetooth ou você não está em uma conexão segura (HTTPS).");
       }
 
       const device = await (navigator as any).bluetooth.requestDevice({
