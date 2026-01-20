@@ -202,8 +202,8 @@ export default function Dashboard() {
           </div>
         )}
         <div className="bg-card/30 p-4 rounded border border-border/30 flex flex-col items-center">
-          <span className="text-xs text-muted-foreground uppercase">Ar Adm. (IAT)</span>
-          <span className="text-xl font-mono text-primary font-bold">{data.iat} °C</span>
+          <span className="text-xs text-muted-foreground uppercase">Velocidade</span>
+          <span className="text-xl font-mono text-primary font-bold">{data.speed} KM/H</span>
         </div>
         <div className="bg-card/30 p-4 rounded border border-border/30 flex flex-col items-center">
           <span className="text-xs text-muted-foreground uppercase">Carga Motor</span>
