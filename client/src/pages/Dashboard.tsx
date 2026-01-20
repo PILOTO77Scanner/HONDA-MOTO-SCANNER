@@ -179,15 +179,15 @@ export default function Dashboard() {
           />
         </Card>
 
-        {/* Speed */}
+        {/* IAT Gauge */}
         <Card className="bg-card/40 border-primary/20 hover:border-primary/50 transition-colors backdrop-blur-sm relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
           <Gauge 
-            value={data.speed} 
+            value={data.iat} 
             min={0} 
-            max={240} 
-            label="Velocidade" 
-            unit="KM/H" 
+            max={100} 
+            label="Ar Admissão (IAT)" 
+            unit="°C" 
             color="var(--secondary)"
           />
         </Card>
@@ -212,7 +212,7 @@ export default function Dashboard() {
         <div className="bg-card/30 p-4 rounded border border-border/30 flex flex-col items-center">
           <span className="text-xs text-muted-foreground uppercase">Protocolo</span>
           <span className="text-xl font-mono text-primary font-bold text-xs truncate w-full text-center">
-            {isConnected ? "KWP2000" : "---"}
+            {isConnected ? (isEcuConnected ? "ISO 14230-4 (KWP)" : "ELM327 Ativo") : "---"}
           </span>
         </div>
       </div>
