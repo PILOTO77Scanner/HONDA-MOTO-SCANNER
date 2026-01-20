@@ -177,6 +177,10 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         return ""; 
       } catch (err) {
         console.error("Write error:", err);
+        // Attempt to reconnect if write fails
+        if (device.gatt?.connected === false) {
+          onDisconnected();
+        }
         return "ERROR";
       }
     }
@@ -229,6 +233,8 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         acceptAllDevices: true,
         optionalServices: [SERVICE_UUID, ALT_SERVICE_UUID, "00001101-0000-1000-8000-00805f9b34fb", 0xfff0]
       });
+
+      device.addEventListener('gattserverdisconnected', onDisconnected);
 
       const server = await device.gatt?.connect();
       if (!server) throw new Error("Servidor GATT não encontrado");
@@ -329,6 +335,19 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       }
     }
   };
+
+  const onDisconnected = useCallback(() => {
+    setIsConnected(false);
+    setIsEcuConnected(false);
+    setDevice(null);
+    setCharacteristic(null);
+    if (simulationRef.current) clearInterval(simulationRef.current);
+    toast({
+      title: "Bluetooth Desconectado",
+      description: "A conexão com o adaptador ELM327 foi perdida.",
+      variant: "destructive"
+    });
+  }, [toast]);
 
   const disconnect = useCallback(() => {
     // Auto-save session on disconnect
