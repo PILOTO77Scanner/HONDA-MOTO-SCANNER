@@ -31,7 +31,7 @@ export default function Dashboard() {
       {/* Header / Status Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card/50 p-4 rounded-lg border border-border/50 backdrop-blur-sm">
         <div>
-          <h1 className="text-2xl md:text-3xl text-glow">Honda Moto Scanner <span className="text-xs align-top opacity-50 font-sans tracking-normal">v1.4</span></h1>
+          <h1 className="text-2xl md:text-3xl text-glow">Honda Moto Scanner <span className="text-xs align-top opacity-50 font-sans tracking-normal">v1.5</span></h1>
           {isEcuConnected && (
             <div className="text-primary font-bold text-sm mt-1 animate-pulse">
               Moto Identificada: {deviceModel}
@@ -210,7 +210,7 @@ export default function Dashboard() {
         <div className="bg-card/30 p-4 rounded border border-border/30 flex flex-col items-center">
           <span className="text-xs text-muted-foreground uppercase">Protocolo</span>
           <span className="text-xl font-mono text-primary font-bold text-xs truncate w-full text-center">
-            {isConnected ? (isEcuConnected ? "ISO 14230-4 (KWP)" : "ELM327 Ativo") : "---"}
+            {isConnected ? (isEcuConnected ? "ISO/CAN AUTO" : "ELM327 Ativo") : "---"}
           </span>
         </div>
       </div>

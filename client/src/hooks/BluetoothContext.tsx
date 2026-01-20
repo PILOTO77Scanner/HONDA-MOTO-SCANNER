@@ -293,22 +293,27 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       await sendCommand("AT L0");
       await sendCommand("AT S0");
       await sendCommand("AT ST FF"); // Max timeout for initialization
-      await sendCommand("AT SP 5"); // Force Protocol 5 (ISO 14230-4 KWP Fast Init)
-      await new Promise(r => setTimeout(r, 1000));
+      // Scan protocols from newest (CAN) to oldest (KWP)
+      const protocols = [
+        { id: "6", name: "ISO 15765-4 (CAN 11/500)", header: "7E0" }, // New Honda (2020+)
+        { id: "7", name: "ISO 15765-4 (CAN 29/500)", header: "18DAF110" },
+        { id: "5", name: "ISO 14230-4 (KWP Fast)", header: "8110F1" }, // Standard Honda (2010-2020)
+        { id: "4", name: "ISO 14230-4 (KWP 5Baud)", header: "8110F1" }, // Old Honda
+      ];
 
-      // ECU wakeup sequence for KWP
-      await sendCommand("AT SH 81 10 F1");
-      await sendCommand("01 00");
-      await new Promise(r => setTimeout(r, 500));
-      
-      let initResp = await sendCommand("01 00");
-      let isEcuOk = initResp && !initResp.includes("NO DATA") && !initResp.includes("ERROR") && !initResp.includes("?");
+      let connectedProtocol = null;
 
-      if (!isEcuOk) {
-        await sendCommand("AT SP 5"); // Force ISO 14230-4 (KWP FAST)
-        initResp = await sendCommand("01 00");
-        isEcuOk = initResp && !initResp.includes("NO DATA");
+      for (const proto of protocols) {
+        await sendCommand(`AT SP ${proto.id}`);
+        await sendCommand(`AT SH ${proto.header}`);
+        const resp = await sendCommand("01 00");
+        if (resp && !resp.includes("NO DATA") && !resp.includes("ERROR") && !resp.includes("?")) {
+          connectedProtocol = proto;
+          break;
+        }
       }
+
+      let isEcuOk = !!connectedProtocol;
 
       if (!isEcuOk) {
         await sendCommand("AT SH 81 10 F1");
