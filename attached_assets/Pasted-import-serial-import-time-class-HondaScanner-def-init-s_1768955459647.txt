@@ -1,0 +1,79 @@
+import serial
+import time
+
+class HondaScanner:
+    def __init__(self, port='COM3'):
+        # A velocidade de 10400 é o segredo do protocolo Honda K-Line
+        self.ser = serial.Serial()
+        self.ser.port = port
+        self.ser.baudrate = 10400
+        self.ser.bytesize = serial.EIGHTBITS
+        self.ser.parity = serial.PARITY_NONE
+        self.ser.stopbits = serial.STOPBITS_ONE
+        self.ser.timeout = 1
+
+    def conectar(self):
+        try:
+            if not self.ser.is_open:
+                self.ser.open()
+            
+            # --- WAKE-UP SEQUENCE ---
+            self.ser.break_condition = True
+            time.sleep(0.07)  # 70ms em Low
+            self.ser.break_condition = False
+            time.sleep(0.12)  # 120ms de repouso
+            
+            # Iniciar sessão (Start Communication)
+            self.enviar_comando([0xFE, 0x04, 0x72, 0x8C])
+            return True
+        except Exception as e:
+            print(f"Erro ao conectar: {e}")
+            return False
+
+    def enviar_comando(self, lista_bytes):
+        # Envia os bytes para a ECU
+        self.ser.write(bytearray(lista_bytes))
+        # A ECU sempre ecoa o comando de volta, então limpamos o buffer
+        self.ser.read(len(lista_bytes)) 
+
+    def ler_sensores(self):
+        # Comando real: Ler tabela de dados dinâmicos (0xF0)
+        # Pacote: [Header, Tamanho, Tipo, Tabela, Checksum]
+        comando = [0x72, 0x05, 0x00, 0xF0, 0x99]
+        self.enviar_comando(comando)
+        
+        resposta = self.ser.read(32) # Lê o pacote de dados da ECU
+        
+        if len(resposta) > 10:
+            # --- CÁLCULOS DE CONVERSÃO ---
+            # RPM: (Byte high * 256 + Byte low) / 4
+            rpm = ((resposta[4] * 256) + resposta[5]) / 4
+            
+            # Temperatura: Valor - 40
+            temperatura = resposta[3] - 40
+            
+            # Bateria: Valor / 10
+            voltagem = resposta[8] / 10.0
+            
+            # TPS (Borboleta): (Valor * 100) / 255
+            tps = (resposta[11] * 100) / 255
+            
+            return {
+                "rpm": int(rpm),
+                "temp": temperatura,
+                "volt": voltagem,
+                "tps": int(tps)
+            }
+        return None
+
+    def apagar_erros(self):
+        # Comando para resetar memória de falhas (DTC Clear)
+        comando_reset = [0x72, 0x05, 0x00, 0x44, 0x45]
+        self.enviar_comando(comando_reset)
+        return "Comando de Reset Enviado!"
+
+# --- EXEMPLO DE USO NO SEU APP ---
+# scanner = HondaScanner('COM3')
+# if scanner.conectar():
+#     dados = scanner.ler_sensores()
+#     print(f"RPM: {dados['rpm']} | Temp: {dados['temp']}°C")
