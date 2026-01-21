@@ -82,6 +82,35 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleResponse = useCallback((response: string) => {
+    if (response.includes("72") && response.length > 20) { // Honda Custom K-Line Table (0xF0)
+      const clean = response.replace(/\s/g, '');
+      // Example index based on Python script: [Header(1), Size(1), Type(1), Table(1), ECT(1), RPM_H(1), RPM_L(1), ... Volt(1), ... TPS(1)]
+      // Python: temperatura = resposta[3] - 40 (Index 3 if 0-based and 72 is header)
+      // In hex string '720500F0...', index 3 is byte 4 (char 6,7)
+      const bytes = [];
+      for(let i=0; i<clean.length; i+=2) {
+        bytes.push(parseInt(clean.substring(i, i+2), 16));
+      }
+      
+      if (bytes.length > 10) {
+        // Temperature (Index 3 in payload after header/size/type)
+        const temp = bytes[4] - 40; 
+        // RPM (Index 4, 5)
+        const rpm = ((bytes[5] * 256) + bytes[6]) / 4;
+        // Voltage (Index 8)
+        const volt = bytes[9] / 10.0;
+        // TPS (Index 11)
+        const tps = (bytes[12] * 100) / 255;
+
+        setData(prev => ({
+          ...prev,
+          oilTemp: !isNaN(temp) ? temp : prev.oilTemp,
+          rpm: !isNaN(rpm) ? rpm : prev.rpm,
+          voltage: !isNaN(volt) ? volt : prev.voltage,
+          tps: !isNaN(tps) ? Math.round(tps) : prev.tps
+        }));
+      }
+    }
     if (response.includes("410C") || response.includes("41 0C")) { // RPM
       const clean = response.replace(/\s/g, '');
       const parts = clean.split("410C");
@@ -220,7 +249,8 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
     
     simulationRef.current = setInterval(async () => {
       if (device && isConnected) {
-        const commands = ["01 0C", "01 0D", "01 11", "01 0B", "01 14", "01 0F", "01 05", "01 01", "AT RV"];
+        // Agora priorizamos a Tabela Dinâmica Honda (0xF0) conforme Python
+        const commands = ["72 05 00 F0 99", "01 0C", "01 0D", "01 11", "01 05", "AT RV"];
         for (const cmd of commands) {
           if (!isConnected) break;
           await sendCommand(cmd);
@@ -284,18 +314,31 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
         });
       }
       
-      // 2. Inicialização (Comandos AT) baseada no OBDConnectionManager
+      // 2. Inicialização (Comandos AT) baseada no OBDConnectionManager e Wake-up Honda
       await sendCommand("AT Z");    // Reset
       await new Promise(r => setTimeout(r, 1000));
       await sendCommand("AT D");    // Defaults
+      
+      // Simulação da sequência de Wake-up via comandos AT (usando tempos do Python)
+      // No ELM327, podemos simular o 'Break' com o protocolo manual ou comandos de temporização
+      await sendCommand("AT ST FF"); // Timeout longo
+      await sendCommand("AT AT 0");  // Adaptive timing off para estabilidade
+      
       await sendCommand("AT E0");   // Echo off
       await sendCommand("AT L0");   // Linefeeds off
       await sendCommand("AT S0");   // Spaces off
-      await sendCommand("AT SP 0"); // Auto-protocolo (conforme código Android fornecido)
-      await new Promise(r => setTimeout(r, 1000));
       
-      // 3. Verificação de conexão com ECU usando PID 010C (RPM) como no loop do Android
-      const initResp = await sendCommand("01 0C");
+      // Protocolo Honda K-Line (10400 baud)
+      await sendCommand("AT IB 10"); // Set baud rate to 10400
+      await sendCommand("AT SP 4");  // Protocolo 4 (KWP 5 Baud init) ou 5 (Fast)
+      await sendCommand("AT SH 81 10 F1"); // Header Honda
+      
+      // Comando de Iniciar Sessão conforme Python: [FE 04 72 8C]
+      await sendCommand("FE 04 72 8C");
+      await new Promise(r => setTimeout(r, 500));
+      
+      // 3. Verificação de conexão com ECU usando Tabela Dinâmica (0xF0)
+      const initResp = await sendCommand("72 05 00 F0 99");
       let isEcuOk = initResp && !initResp.includes("NO DATA") && !initResp.includes("ERROR") && !initResp.includes("?");
 
       if (!isEcuOk) {

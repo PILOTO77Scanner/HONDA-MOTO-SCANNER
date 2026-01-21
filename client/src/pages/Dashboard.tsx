@@ -31,7 +31,7 @@ export default function Dashboard() {
       {/* Header / Status Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-card/50 p-4 rounded-lg border border-border/50 backdrop-blur-sm">
         <div>
-          <h1 className="text-2xl md:text-3xl text-glow">Honda Moto Scanner <span className="text-xs align-top opacity-50 font-sans tracking-normal">v2.2</span></h1>
+          <h1 className="text-2xl md:text-3xl text-glow">Honda Moto Scanner <span className="text-xs align-top opacity-50 font-sans tracking-normal">v2.3</span></h1>
           {isEcuConnected && (
             <div className="text-primary font-bold text-sm mt-1 animate-pulse">
               Moto Identificada: {deviceModel}
