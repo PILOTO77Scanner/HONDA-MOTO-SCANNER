@@ -318,15 +318,13 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       await sendCommand("AT Z");    // Reset
       await new Promise(r => setTimeout(r, 1000));
       await sendCommand("AT D");    // Defaults
+      await sendCommand("AT L0");   // Linefeeds off
+      await sendCommand("AT E0");   // Echo off
+      await sendCommand("AT S0");   // Spaces off
       
       // Simulação da sequência de Wake-up via comandos AT (usando tempos do Python)
-      // No ELM327, podemos simular o 'Break' com o protocolo manual ou comandos de temporização
       await sendCommand("AT ST FF"); // Timeout longo
       await sendCommand("AT AT 0");  // Adaptive timing off para estabilidade
-      
-      await sendCommand("AT E0");   // Echo off
-      await sendCommand("AT L0");   // Linefeeds off
-      await sendCommand("AT S0");   // Spaces off
       
       // Protocolo Honda K-Line (10400 baud)
       await sendCommand("AT IB 10"); // Set baud rate to 10400
@@ -335,7 +333,7 @@ export function BluetoothProvider({ children }: { children: React.ReactNode }) {
       
       // Comando de Iniciar Sessão conforme Python: [FE 04 72 8C]
       await sendCommand("FE 04 72 8C");
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 1000)); // Espera maior após iniciar sessão
       
       // 3. Verificação de conexão com ECU usando Tabela Dinâmica (0xF0)
       const initResp = await sendCommand("72 05 00 F0 99");
